@@ -5,7 +5,7 @@ plugins {
     id "run.halo.plugin.devtools" version "0.0.4"
 }
 
-group 'run.halo.starter'
+group 'top.roozen.bangumi'
 sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
@@ -21,6 +21,10 @@ dependencies {
 
     testImplementation 'run.halo.app:api'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.withType(JavaCompile){
+    options.encoding="UTF-8"
 }
 
 test {

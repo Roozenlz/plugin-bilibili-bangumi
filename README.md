@@ -43,3 +43,8 @@ halo:
     fixedPluginPath:
       - "/path/to/plugin-starter"
 ```
+
+./gradlew.bat clean build -x test
+
+./gradlew.bat build && curl -u admin:admin -X PUT http://localhost:8090/apis/api.console.halo.run/v1alpha1/plugins/plugin-bilibili-bangumi/reload
+

@@ -1,0 +1,15 @@
+apiVersion: v1alpha1
+kind: Setting
+metadata:
+  name: plugin-bilibili-bangumi-settings
+spec:
+  forms:
+    - group: base
+      label: 基本设置
+      formSchema:
+        - $formkit: text
+          label: Bilibili的ID
+          name: vmid
+          validation: required
+          value: '88704593'
+          help: 打开链接(https://space.bilibili.com/)后，出现在链接后面的一串数字就是ID,注意：需要在个人主页的打开设置->隐私设置->公开我的追番追剧

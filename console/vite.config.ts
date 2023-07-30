@@ -5,7 +5,7 @@ import Vue from "@vitejs/plugin-vue";
 import VueJsx from "@vitejs/plugin-vue-jsx";
 import Icons from "unplugin-icons/vite";
 
-const pluginEntryName = "PluginStarter";
+const pluginEntryName = "plugin-bilibili-bangumi";
 
 // https://vitejs.dev/config/
 export default ({ mode }: { mode: string }) => {
