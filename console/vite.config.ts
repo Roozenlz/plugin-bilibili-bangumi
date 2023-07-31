@@ -5,9 +5,9 @@ import Vue from "@vitejs/plugin-vue";
 import VueJsx from "@vitejs/plugin-vue-jsx";
 import Icons from "unplugin-icons/vite";
 
-const pluginEntryName = "plugin-bilibili-bangumi";
+//暂时不启用插件用户界面
+const pluginEntryName = "plugin-bilibili-bangumi-forbidden";
 
-// https://vitejs.dev/config/
 export default ({ mode }: { mode: string }) => {
   const isProduction = mode === "production";
   const outDir = isProduction
