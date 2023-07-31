@@ -1,7 +1,6 @@
 apiVersion: plugin.halo.run/v1alpha1
 kind: Plugin
 metadata:
-  # The name defines how the plugin is invoked,A unique name
   name: plugin-bilibili-bangumi
 spec:
   enabled: true
@@ -9,12 +8,12 @@ spec:
   author:
     name: Roozen
     website: https://roozen.top
-  logo: https://halo.run/logo
+  logo: bangumi.png
   settingName: plugin-bilibili-bangumi-settings
   configMapName: plugin-bilibili-bangumi-configmap
   homepage: https://github.com/Roozenlz/plugin-bilibili-bangumi
   displayName: "追番插件"
   description: "为主题提供从哔哩哔哩爬取到的追番数据，提供追番页面路由"
   license:
-    - name: "GPL-3.0"
-      url: "https://github.com/halo-dev/plugin-starter/blob/main/LICENSE"
+    - name: "MIT"
+      url: "https://github.com/Roozenlz/plugin-bilibili-bangumi/blob/main/LICENSE"
