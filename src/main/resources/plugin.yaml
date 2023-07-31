@@ -8,7 +8,7 @@ spec:
   author:
     name: Roozen
     website: https://roozen.top
-  logo: bangumi.png
+  logo: logo.png
   settingName: plugin-bilibili-bangumi-settings
   configMapName: plugin-bilibili-bangumi-configmap
   homepage: https://github.com/Roozenlz/plugin-bilibili-bangumi
