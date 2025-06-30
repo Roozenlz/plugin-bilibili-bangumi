@@ -11,8 +11,6 @@ jobs:
     permissions:
       contents: write
     with:
-      ui-path: ui
-      pnpm-version: 9
-      node-version: 22
       java-version: 21
+      skip-node-setup: true
       skip-appstore-release: true
