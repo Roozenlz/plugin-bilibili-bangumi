@@ -1,12 +1,12 @@
 plugins {
     id 'java'
-    id "com.github.node-gradle.node" version "5.0.0"
-    id "io.freefair.lombok" version "8.0.1"
-    id "run.halo.plugin.devtools" version "0.0.4"
+    id "io.freefair.lombok" version "8.13"
+    id "run.halo.plugin.devtools" version "0.6.1"
+//    id "com.github.node-gradle.node" version "5.0.0"
 }
 
 group 'top.roozen.bangumi'
-sourceCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = JavaVersion.VERSION_21
 
 repositories {
     mavenCentral()
@@ -16,30 +16,47 @@ repositories {
 }
 
 dependencies {
-    implementation platform('run.halo.tools.platform:plugin:2.6.0-SNAPSHOT')
+    implementation platform('run.halo.tools.platform:plugin:2.21.0')
     compileOnly 'run.halo.app:api'
 
     testImplementation 'run.halo.app:api'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-}
-
-tasks.withType(JavaCompile){
-    options.encoding="UTF-8"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 test {
     useJUnitPlatform()
 }
 
-node {
-    nodeProjectDir = file("${project.projectDir}/console")
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
-task buildFrontend(type: PnpmTask) {
-    args = ['build']
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.release = 21
 }
 
-build {
-    // build frontend before build
-    tasks.getByName('compileJava').dependsOn('buildFrontend')
+halo {
+    version = '2.21'
+    superAdminUsername = 'admin'
+    superAdminPassword = 'admin'
+    externalUrl = 'http://localhost:8091'
+    docker {
+        // windows 需要改为 npipe:////./pipe/docker_engine
+        // linux、macos 需要改为 unix:///var/run/docker.sock
+        url = 'unix:///Users/roozen/.orbstack/run/docker.sock'
+        apiVersion = '1.45'
+    }
+    port = 8091
+
+    // 开启 debug 断点模式
+    debug = true
+    debugPort = 5005
+
+    containerName = 'plugin-bilibili-bangumi'
+    // 控制台会挂起，等待点击 Attach debugger 按钮
+    suspend = true
 }

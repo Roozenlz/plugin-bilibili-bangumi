@@ -4,7 +4,7 @@ metadata:
   name: plugin-bilibili-bangumi
 spec:
   enabled: true
-  requires: ">=2.5.0"
+  requires: ">=2.21.0"
   author:
     name: Roozen
     website: https://roozen.top

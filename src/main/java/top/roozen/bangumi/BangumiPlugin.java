@@ -4,6 +4,7 @@ import org.pf4j.PluginWrapper;
 import org.springframework.stereotype.Component;
 import run.halo.app.extension.SchemeManager;
 import run.halo.app.plugin.BasePlugin;
+import run.halo.app.plugin.PluginContext;
 
 /**
  * @author <a href="https://roozen.top">Roozen</a>
@@ -15,8 +16,8 @@ public class BangumiPlugin extends BasePlugin {
 
     private final SchemeManager schemeManager;
 
-    public BangumiPlugin(PluginWrapper wrapper, SchemeManager schemeManager) {
-        super(wrapper);
+    public BangumiPlugin(PluginContext pluginContext,SchemeManager schemeManager) {
+        super(pluginContext);
         this.schemeManager = schemeManager;
     }
 
