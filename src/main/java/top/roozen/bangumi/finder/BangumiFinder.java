@@ -32,7 +32,7 @@ public class BangumiFinder {
     /**
      * 根据分页参数获取B站番剧数据
      *
-     * @param typeNum 番剧类型编号（1.追番，2.电影）        
+     * @param typeNum 番剧类型编号（1.追番，2.追剧）        
      * @param status 番剧状态（0.全部，1.想看，2.在看，3.已看）
      * @param ps 每页数量
      * @param pn 页码
@@ -45,7 +45,7 @@ public class BangumiFinder {
     /**
      * 获取所有B站番剧数据（分页获取全部）
      *
-     * @param typeNum 番剧类型编号  （1.追番，2.电影）        
+     * @param typeNum 番剧类型编号  （1.追番，2.追剧）        
      * @param status 番剧状态（0.全部，1.想看，2.在看，3.已看）
      * @return Bangumi对象列表
      */
@@ -65,7 +65,7 @@ public class BangumiFinder {
     /**
      * 获取指定条件下的数据总数
      *
-     * @param typeNum 番剧类型编号（1.追番，2.电影）        
+     * @param typeNum 番剧类型编号（1.追番，2.追剧）        
      * @param status 番剧状态（0.全部，1.想看，2.在看，3.已看）
      * @return 数据总数
      */
@@ -106,7 +106,7 @@ public class BangumiFinder {
     /**
      * 异步获取B站番剧数据
      *
-     * @param typeNum 番剧类型编号（1.追番，2.电影）
+     * @param typeNum 番剧类型编号（1.追番，2.追剧）
      * @param status 番剧状态（0.全部，1.想看，2.在看，3.已看）
      * @param ps 每页数量
      * @param pn 页码
@@ -212,7 +212,7 @@ public class BangumiFinder {
     /**
      * 异步获取数据总数
      *
-     * @param typeNum 番剧类型编号（1.追番，2.电影）
+     * @param typeNum 番剧类型编号（1.追番，2.追剧）
      * @param status 番剧状态（0.全部，1.想看，2.在看，3.已看）
      * @return 数据总数的Mono包装
      */
@@ -237,7 +237,7 @@ public class BangumiFinder {
     /**
      * 分页获取番剧列表（使用默认配置）
      *
-     * @param typeNum 番剧类型编号（1.追番，2.电影）
+     * @param typeNum 番剧类型编号（1.追番，2.追剧）
      * @param status 番剧状态（0.全部，1.想看，2.在看，3.已看）
      * @param page 页码
      * @param size 每页大小
@@ -250,7 +250,7 @@ public class BangumiFinder {
     /**
      * 分页获取番剧列表
      *
-     * @param typeNum 番剧类型编号（1.追番，2.电影）
+     * @param typeNum 番剧类型编号（1.追番，2.追剧）
      * @param status 番剧状态（0.全部，1.想看，2.在看，3.已看）
      * @param page 页码
      * @param size 每页大小
