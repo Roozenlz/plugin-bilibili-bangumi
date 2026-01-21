@@ -1,4 +1,4 @@
-package top.roozen.bangumi;
+package top.roozen.bangumi.model;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
