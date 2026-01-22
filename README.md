@@ -9,13 +9,13 @@
 
 Halo 2.0 的追番插件，支持在 Console 进行管理以及为主题端提供 `/bangumis` 页面路由。
 
-> 本插件目前有[halo-theme-hao](https://github.com/liuzhihang/halo-theme-hao)、[theme-clarity](https://github.com/acanyo/theme-clarity)主题支持
+> 本插件目前有[halo-theme-hao](https://github.com/liuzhihang/halo-theme-hao)、[halo-theme-aurora](https://github.com/Roozenlz/halo-theme-aurora)、[theme-clarity](https://github.com/acanyo/theme-clarity)主题支持
 
 ## 使用方式
 
 1. 下载，目前提供以下下载方式：
     - GitHub Releases：访问 [Releases](https://github.com/Roozenlz/plugin-bilibili-bangumi/releases) 下载 Assets 中的 JAR 文件。
-    - Halo 应用市场：暂无
+    - [Halo 应用市场](https://www.halo.run/store/apps/app-OTFPN)
 2. 安装，插件安装和更新方式可参考：<https://docs.halo.run/user-guide/plugins>
 3. 安装完成之后，访问 Console 左侧的**插件**菜单项打开**追番插件基本设置界面**，填写你的**bilibiliID**。
 ![](assets/biliID.png)
