@@ -9,7 +9,7 @@
 
 Halo 2.0 的追番插件，支持在 Console 进行管理以及为主题端提供 `/bangumis` 页面路由。
 
-> 本插件目前有[halo-theme-hao](https://github.com/liuzhihang/halo-theme-hao)、[theme-clarity](https://github.com/acanyo/theme-clarit)主题支持
+> 本插件目前有[halo-theme-hao](https://github.com/liuzhihang/halo-theme-hao)、[theme-clarity](https://github.com/acanyo/theme-clarity)主题支持
 
 ## 使用方式
 
