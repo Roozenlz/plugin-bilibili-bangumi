@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import run.halo.app.extension.SchemeManager;
 import run.halo.app.plugin.BasePlugin;
 import run.halo.app.plugin.PluginContext;
+import top.roozen.bangumi.model.Bangumi;
 
 /**
  * @author <a href="https://roozen.top">Roozen</a>

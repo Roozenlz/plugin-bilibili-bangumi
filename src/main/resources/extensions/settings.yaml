@@ -13,3 +13,10 @@ spec:
           validation: required
           value: '88704593'
           help: 打开链接(https://space.bilibili.com/)后，出现在链接后面的一串数字就是ID,注意：需要在个人主页的打开设置->隐私设置->公开我的追番追剧
+        - $formkit: number
+          label: 每页显示数量
+          name: pageSize
+          value: 10
+          min: 1
+          max: 100
+          help: 每页显示的番剧数量，范围1-100

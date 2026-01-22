@@ -9,7 +9,7 @@
 
 Halo 2.0 的追番插件，支持在 Console 进行管理以及为主题端提供 `/bangumis` 页面路由。
 
-> 本插件目前仅有[halo-theme-hao](https://github.com/liuzhihang/halo-theme-hao)主题支持
+> 本插件目前有[halo-theme-hao](https://github.com/liuzhihang/halo-theme-hao)、[theme-clarity](https://github.com/acanyo/theme-clarity)主题支持
 
 ## 使用方式
 
@@ -71,7 +71,164 @@ halo:
       - "/path/to/plugin-links"
 ```
 
-./gradlew.bat clean build -x test
 
-./gradlew.bat build && curl -u admin:admin -X PUT http://localhost:8090/apis/api.console.halo.run/v1alpha1/plugins/plugin-bilibili-bangumi/reload
+## 主题适配
+插件为主题端提供了 `/bangumis` 路由，模板为 `bangumis.html`。
 
+### 模板变量
+#### 路由信息
+
+| 模板路径 | 访问路径 |
+| --- | --- |
+| `/templates/bangumis.html` | `/bangumis` |
+
+#### 路由可选参数
+
+| 参数名 | 描述 | 示例 |
+| --- | --- | --- |
+| `page` | 分页页码 | `/bangumis?page=1` |
+| `typeNum` | 番剧类型（1.追番，2.追剧） | `/bangumis?typeNum=1` |
+| `status` | 番剧状态（0.全部，1.想看，2.在看，3.已看） | `/bangumis?status=2` |
+| `size` | 每页显示数量 | `/bangumis?size=20` |
+
+#### 变量
+
+| 变量名 | 类型 | 描述 |
+| --- | --- | --- |
+| `bangumis` | `BangumiListResult` | 追番列表数据，包含分页信息 |
+
+#### 示例
+
+```html
+<ul>
+    <li th:each="bangumi : ${bangumis.items}">
+        <img th:src="${bangumi.spec.cover}" th:alt="${bangumi.spec.title}" width="280">
+        <h3 th:text="${bangumi.spec.title}"></h3>
+        <p th:text="${bangumi.spec.type}"></p>
+        <p th:text="${bangumi.spec.area}"></p>
+        <p th:text="${bangumi.spec.score}"></p>
+    </li>
+</ul>
+<div th:if="${bangumis.hasPrevious() || bangumis.hasNext()}">
+   <a th:href="@{${bangumis.prevUrl}}">
+      <span>上一页</span>
+   </a>
+   <span th:text="${bangumis.page}"></span>
+   <a th:href="@{${bangumis.nextUrl}}">
+      <span>下一页</span>
+   </a>
+</div>
+```
+
+### Finder API
+
+#### list(typeNum, status, page, size)
+
+**描述**：根据分页参数获取番剧列表
+
+**参数**
+- `typeNum`：int - 番剧类型（1.追番，2.追剧）
+- `status`：int - 番剧状态（0.全部，1.想看，2.在看，3.已看）
+- `page`：int - 分页页码，从 1 开始
+- `size`：int - 分页条数
+
+**返回值**：`BangumiListResult`
+
+**示例**
+
+```html
+<th:block th:with="bangumis = ${bangumiFinder.list(1, 0, 1, 10)}">
+    <ul>
+        <li th:each="bangumi : ${bangumis.items}">
+            <img th:src="${bangumi.spec.cover}" th:alt="${bangumi.spec.title}" width="280">
+        </li>
+    </ul>
+    <div>
+        <span th:text="${bangumis.page}"></span>
+    </div>
+</th:block>
+```
+
+#### getBiliData(typeNum, status, ps, pn)
+
+**描述**：根据分页参数获取B站番剧数据
+
+**参数**
+- `typeNum`：int - 番剧类型（1.追番，2.追剧）
+- `status`：int - 番剧状态（0.全部，1.想看，2.在看，3.已看）
+- `ps`：int - 每页数量
+- `pn`：int - 页码
+
+**返回值**：`List<Bangumi>`
+
+**示例**
+
+```html
+<ul>
+    <li th:each="bangumi : ${bangumiFinder.getBiliData(1, 0, 10, 1)}">
+        <img th:src="${bangumi.spec.cover}" th:alt="${bangumi.spec.title}" width="280">
+    </li>
+</ul>
+```
+
+#### getBiliDataAll(typeNum, status)
+
+**描述**：获取所有B站番剧数据
+
+**参数**
+- `typeNum`：int - 番剧类型（1.追番，2.追剧）
+- `status`：int - 番剧状态（0.全部，1.想看，2.在看，3.已看）
+
+**返回值**：`List<Bangumi>`
+
+**示例**
+
+```html
+<ul>
+    <li th:each="bangumi : ${bangumiFinder.getBiliDataAll(1, 0)}">
+        <img th:src="${bangumi.spec.cover}" th:alt="${bangumi.spec.title}" width="280">
+    </li>
+</ul>
+```
+
+### 类型定义
+
+#### Bangumi
+
+```json
+{
+  "spec": {
+    "title": "string",                                  // 番剧名称
+    "type": "string",                                   // 番剧类型
+    "area": "string",                                   // 地区
+    "cover": "string",                                  // 封面图片链接
+    "totalCount": "string",                             // 总集数
+    "id": "string",                                     // 番剧ID
+    "follow": "string",                                 // 追番人数
+    "view": "string",                                   // 播放量
+    "danmaku": "string",                                // 弹幕数
+    "coin": "string",                                   // 硬币数
+    "score": "string",                                  // 评分
+    "des": "string",                                    // 描述
+    "url": "string"                                     // 番剧链接
+  }
+}
+```
+
+#### BangumiListResult
+
+```json
+{
+  "items": [Bangumi],                                     // 番剧列表数据
+  "page": 1,                                              // 当前页码
+  "size": 10,                                             // 每页大小
+  "total": 100,                                           // 总记录数
+  "typeNum": 1,                                           // 类型编号
+  "status": 0,                                            // 状态码
+  "hasPrevious": true,                                    // 是否有上一页
+  "hasNext": true,                                        // 是否有下一页
+  "prevUrl": "?page=1&typeNum=1&status=0",              // 上一页URL
+  "nextUrl": "?page=3&typeNum=1&status=0",              // 下一页URL
+  "totalPages": 10                                        // 总页数
+}
+```
