@@ -20,3 +20,12 @@ spec:
           min: 1
           max: 100
           help: 每页显示的番剧数量，范围1-100
+        - $formkit: checkbox
+          label: 关闭封面缩略图
+          name: enable_cover_thumbnail
+          id: enable_cover_thumbnail
+          key: enable_cover_thumbnail 
+          value: false
+          help: 关闭后将使用原图显示封面
+          on-value: true
+          off-value: false
