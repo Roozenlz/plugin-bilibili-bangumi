@@ -149,6 +149,34 @@ halo:
 </th:block>
 ```
 
+#### list({...})
+
+**描述**：统一参数的番剧列表查询方法，支持分页、类型、状态等参数，且均为可选参数。
+
+**参数**
+- `params`：Map - 查询参数，包含：
+  - `page`：int - 分页页码，从 1 开始（默认值：1）
+  - `size`：int - 分页条数（默认值：10）
+  - `typeNum`：int - 番剧类型（1.追番，2.追剧）（默认值：1）
+  - `status`：int - 番剧状态（0.全部，1.想看，2.在看，3.已看）（默认值：0）
+
+**返回值**：`BangumiListResult`
+
+**示例**
+
+```html
+<ul th:with="bangumis = ${bangumiFinder.list({
+  page: 1,
+  size: 10,
+  typeNum: 1,
+  status: 2
+})}">
+    <li th:each="bangumi : ${bangumis.items}">
+        <a th:href="${bangumi.spec.url}" th:text="${bangumi.spec.title}"></a>
+    </li>
+</ul>
+```
+
 #### getBiliData(typeNum, status, ps, pn)
 
 **描述**：根据分页参数获取B站番剧数据
