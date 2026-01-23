@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
@@ -15,6 +16,7 @@ import run.halo.app.plugin.ReactiveSettingFetcher;
 import run.halo.app.theme.finders.Finder;
 import top.roozen.bangumi.client.BilibiliBangumiClient;
 import top.roozen.bangumi.model.Bangumi;
+import top.roozen.bangumi.model.BangumiListQuery;
 import top.roozen.bangumi.model.BangumiListResult;
 import top.roozen.bangumi.request.BilibiliBangumiRequest;
 
@@ -232,6 +234,23 @@ public class BangumiFinder {
                     return totalNode != null ? totalNode.intValue() : 0;
                 })
         );
+    }
+    /**
+     * 统一参数的番剧列表查询方法，支持分页、类型、状态等参数，且均为可选参数。
+     *
+     * @param params 查询参数，包含：
+     *               - page: 分页页码，从 1 开始
+     *               - size: 分页条数
+     *               - typeNum: 番剧类型编号（1.追番，2.追剧）
+     *               - status: 番剧状态（0.全部，1.想看，2.在看，3.已看）
+     * @return 番剧列表结果的Mono包装
+     */
+    public Mono<BangumiListResult> list(Map<String, Object> params) {
+        int typeNum = params.containsKey("typeNum") ? ((Number) params.get("typeNum")).intValue() : 1;
+        int status = params.containsKey("status") ? ((Number) params.get("status")).intValue() : 0;
+        int page = params.containsKey("page") ? ((Number) params.get("page")).intValue() : 1;
+        int size = params.containsKey("size") ? ((Number) params.get("size")).intValue() : 10;
+        return list(typeNum, status, page, size);
     }
 
     /**
