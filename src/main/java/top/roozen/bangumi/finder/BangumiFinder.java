@@ -113,8 +113,17 @@ public class BangumiFinder {
      * @return Bangumi对象列表的Mono包装
      */
     private Mono<List<Bangumi>> getBiliDataReactive(int typeNum, int status, int ps, int pn) {
-        return getBiliId().flatMap(vmid -> 
-            bilibiliBangumiClient.listBiliBangumiByPage(
+        
+        return Mono.zip(
+            getBiliId(),
+            this.settingFetcher.get("base").map(setting -> 
+                !setting.get("enable_cover_thumbnail").asBoolean(false)
+            ).defaultIfEmpty(true)
+        ).flatMap(tuple -> {
+            String vmid = tuple.getT1();
+            boolean useThumbnail = tuple.getT2();
+            
+            return bilibiliBangumiClient.listBiliBangumiByPage(
                 BilibiliBangumiRequest.builder()
                     .vmid(vmid)
                     .typeNum(typeNum)
@@ -161,7 +170,9 @@ public class BangumiFinder {
                     // 修复正则表达式，将HTTP转换为HTTPS
                     String httpsCoverUrl = coverUrl.startsWith("http://") ? 
                         coverUrl.replaceFirst("^http://", "https://") : coverUrl;
-                    spec.setCover(httpsCoverUrl + "@220w_280h.webp");
+                    // 根据配置决定使用缩略图还是原图
+                    String finalCoverUrl = useThumbnail ? httpsCoverUrl + "@220w_280h.webp" : httpsCoverUrl;
+                    spec.setCover(finalCoverUrl);
                     
                     JsonNode totalCountNode = item.get("total_count");
                     int total_count = totalCountNode != null ? totalCountNode.intValue() : -1;
@@ -205,8 +216,8 @@ public class BangumiFinder {
                     spec.setUrl("https://www.bilibili.com/bangumi/media/md" + spec.getId());
                     return bangumi;
                 })
-                .collectList()
-        );
+                .collectList();
+        });
     }
 
     /**
