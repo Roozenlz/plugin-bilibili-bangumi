@@ -111,12 +111,11 @@ public class BangumiListResult {
         if (!hasPrevious()) {
             return null;
         }
-        StringBuilder url = new StringBuilder("?page=" + (page - 1));
-        // 如果大小不是来自配置，则在URL中添加size参数
+        StringBuilder url = new StringBuilder("/bangumis/page/" + (page - 1));
+        url.append("?typeNum=").append(typeNum).append("&status=").append(status);
         if (!sizeFromConfig) {
             url.append("&size=").append(size);
         }
-        url.append("&typeNum=").append(typeNum).append("&status=").append(status);
         return url.toString();
     }
 
@@ -129,12 +128,11 @@ public class BangumiListResult {
         if (!hasNext()) {
             return null;
         }
-        StringBuilder url = new StringBuilder("?page=" + (page + 1));
-        // 如果大小不是来自配置，则在URL中添加size参数
+        StringBuilder url = new StringBuilder("/bangumis/page/" + (page + 1));
+        url.append("?typeNum=").append(typeNum).append("&status=").append(status);
         if (!sizeFromConfig) {
             url.append("&size=").append(size);
         }
-        url.append("&typeNum=").append(typeNum).append("&status=").append(status);
         return url.toString();
     }
 
