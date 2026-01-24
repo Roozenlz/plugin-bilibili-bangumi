@@ -86,7 +86,7 @@ halo:
 
 | 参数名 | 描述 | 示例 |
 | --- | --- | --- |
-| `page` | 分页页码 | `/bangumis?page=1` |
+| `page` | 分页页码 | `/bangumis?page=1` 或 `/bangumis/page/1` |
 | `typeNum` | 番剧类型（1.追番，2.追剧） | `/bangumis?typeNum=1` |
 | `status` | 番剧状态（0.全部，1.想看，2.在看，3.已看） | `/bangumis?status=2` |
 | `size` | 每页显示数量 | `/bangumis?size=20` |
@@ -255,8 +255,8 @@ halo:
   "status": 0,                                            // 状态码
   "hasPrevious": true,                                    // 是否有上一页
   "hasNext": true,                                        // 是否有下一页
-  "prevUrl": "?page=1&typeNum=1&status=0",              // 上一页URL
-  "nextUrl": "?page=3&typeNum=1&status=0",              // 下一页URL
+  "prevUrl": "/bangumis/page/1?typeNum=1&status=0",     // 上一页URL
+  "nextUrl": "/bangumis/page/3?typeNum=1&status=0",     // 下一页URL
   "totalPages": 10                                        // 总页数
 }
 ```

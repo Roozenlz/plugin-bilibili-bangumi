@@ -33,6 +33,29 @@ public class BangumiPluginConfig {
     @Bean
     RouterFunction<ServerResponse> repoTemplateRouter() {
         return RouterFunctions.route()
+            .GET("/bangumis/page/{page}", request -> {
+                String pagePath = request.pathVariable("page");
+                int page = Integer.parseInt(pagePath);
+                int typeNum = Integer.parseInt(request.queryParam("typeNum").orElse("1"));
+                int status = Integer.parseInt(request.queryParam("status").orElse("0"));
+                
+                return settingFetcher.get("base")
+                    .map(setting -> setting.get("pageSize").asText("10"))
+                    .defaultIfEmpty("10")
+                    .flatMap(pageSize -> {
+                        boolean sizeFromConfig = !request.queryParam("size").isPresent();
+                        int size = request.queryParam("size")
+                            .map(Integer::parseInt)
+                            .orElse(Integer.parseInt(pageSize));
+                        
+                        return bangumiFinder.list(typeNum, status, page, size, sizeFromConfig)
+                            .flatMap(bangumiList -> {
+                                Map<String, Object> model = new HashMap<>();
+                                model.put("bangumis", bangumiList);
+                                return ServerResponse.ok().render("bangumis", model);
+                            });
+                    });
+            })
             .GET("/bangumis", request -> {
                 // 解析请求参数：页码、类型编号、状态
                 int page = Integer.parseInt(request.queryParam("page").orElse("1"));
