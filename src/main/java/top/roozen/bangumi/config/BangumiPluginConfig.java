@@ -3,6 +3,7 @@ package top.roozen.bangumi.config;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -33,21 +34,21 @@ public class BangumiPluginConfig {
     @Bean
     RouterFunction<ServerResponse> repoTemplateRouter() {
         return RouterFunctions.route()
-            .GET("/bangumis/page/{page}", request -> {
+            .GET("/bangumis/page/{page:\\d+}", request -> {
                 String pagePath = request.pathVariable("page");
-                int page = Integer.parseInt(pagePath);
-                int typeNum = Integer.parseInt(request.queryParam("typeNum").orElse("1"));
-                int status = Integer.parseInt(request.queryParam("status").orElse("0"));
-                
+                int page = NumberUtils.toInt(pagePath, 1);
+                int typeNum = NumberUtils.toInt(request.queryParam("typeNum").orElse(null), 1);
+                int status = NumberUtils.toInt(request.queryParam("status").orElse(null), 0);
+
                 return settingFetcher.get("base")
                     .map(setting -> setting.get("pageSize").asText("10"))
                     .defaultIfEmpty("10")
                     .flatMap(pageSize -> {
                         boolean sizeFromConfig = !request.queryParam("size").isPresent();
                         int size = request.queryParam("size")
-                            .map(Integer::parseInt)
+                            .map(s -> NumberUtils.toInt(s, Integer.parseInt(pageSize)))
                             .orElse(Integer.parseInt(pageSize));
-                        
+
                         return bangumiFinder.list(typeNum, status, page, size, sizeFromConfig)
                             .flatMap(bangumiList -> {
                                 Map<String, Object> model = new HashMap<>();
@@ -57,23 +58,19 @@ public class BangumiPluginConfig {
                     });
             })
             .GET("/bangumis", request -> {
-                // 解析请求参数：页码、类型编号、状态
-                int page = Integer.parseInt(request.queryParam("page").orElse("1"));
-                int typeNum = Integer.parseInt(request.queryParam("typeNum").orElse("1"));
-                int status = Integer.parseInt(request.queryParam("status").orElse("0"));
-                
-                // 获取配置中的页面大小设置
+                int page = NumberUtils.toInt(request.queryParam("page").orElse(null), 1);
+                int typeNum = NumberUtils.toInt(request.queryParam("typeNum").orElse(null), 1);
+                int status = NumberUtils.toInt(request.queryParam("status").orElse(null), 0);
+
                 return settingFetcher.get("base")
                     .map(setting -> setting.get("pageSize").asText("10"))
                     .defaultIfEmpty("10")
                     .flatMap(pageSize -> {
-                        // 判断是否使用配置中的页面大小还是请求参数中的大小
                         boolean sizeFromConfig = !request.queryParam("size").isPresent();
                         int size = request.queryParam("size")
-                            .map(Integer::parseInt)
+                            .map(s -> NumberUtils.toInt(s, Integer.parseInt(pageSize)))
                             .orElse(Integer.parseInt(pageSize));
-                        
-                        // 查询番剧列表并渲染响应
+
                         return bangumiFinder.list(typeNum, status, page, size, sizeFromConfig)
                             .flatMap(bangumiList -> {
                                 Map<String, Object> model = new HashMap<>();

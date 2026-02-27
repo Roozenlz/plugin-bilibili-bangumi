@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.math.NumberUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.Metadata;
@@ -257,11 +258,31 @@ public class BangumiFinder {
      * @return 番剧列表结果的Mono包装
      */
     public Mono<BangumiListResult> list(Map<String, Object> params) {
-        int typeNum = params.containsKey("typeNum") ? ((Number) params.get("typeNum")).intValue() : 1;
-        int status = params.containsKey("status") ? ((Number) params.get("status")).intValue() : 0;
-        int page = params.containsKey("page") ? ((Number) params.get("page")).intValue() : 1;
-        int size = params.containsKey("size") ? ((Number) params.get("size")).intValue() : 10;
+        int typeNum = toIntSafely(params.get("typeNum"), 1);
+        int status = toIntSafely(params.get("status"), 0);
+        int page = toIntSafely(params.get("page"), 1);
+        int size = toIntSafely(params.get("size"), 10);
         return list(typeNum, status, page, size);
+    }
+
+    /**
+     * 安全地将对象转换为整数
+     *
+     * @param value 要转换的值
+     * @param defaultValue 默认值
+     * @return 转换后的整数值
+     */
+    private int toIntSafely(Object value, int defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        if (value instanceof String) {
+            return NumberUtils.toInt((String) value, defaultValue);
+        }
+        return defaultValue;
     }
 
     /**
