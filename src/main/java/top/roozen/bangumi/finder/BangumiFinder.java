@@ -1,23 +1,18 @@
 package top.roozen.bangumi.finder;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.Metadata;
 import run.halo.app.plugin.ReactiveSettingFetcher;
 import run.halo.app.theme.finders.Finder;
 import top.roozen.bangumi.client.BilibiliBangumiClient;
 import top.roozen.bangumi.model.Bangumi;
-import top.roozen.bangumi.model.BangumiListQuery;
+import top.roozen.bangumi.model.BilibiliApiResponse;
 import top.roozen.bangumi.model.BangumiListResult;
 import top.roozen.bangumi.request.BilibiliBangumiRequest;
 
@@ -29,16 +24,17 @@ import top.roozen.bangumi.request.BilibiliBangumiRequest;
 @Finder("bangumiFinder")
 @RequiredArgsConstructor
 public class BangumiFinder {
+
     private final BilibiliBangumiClient bilibiliBangumiClient;
     private final ReactiveSettingFetcher settingFetcher;
-    
+
     /**
      * 根据分页参数获取B站番剧数据
      *
-     * @param typeNum 番剧类型编号（1.追番，2.追剧）        
-     * @param status 番剧状态（0.全部，1.想看，2.在看，3.已看）
-     * @param ps 每页数量
-     * @param pn 页码
+     * @param typeNum 番剧类型编号（1.追番，2.追剧）
+     * @param status  番剧状态（0.全部，1.想看，2.在看，3.已看）
+     * @param ps      每页数量
+     * @param pn      页码
      * @return Bangumi对象列表
      */
     public List<Bangumi> getBiliData(int typeNum, int status, int ps, int pn) {
@@ -48,8 +44,8 @@ public class BangumiFinder {
     /**
      * 获取所有B站番剧数据（分页获取全部）
      *
-     * @param typeNum 番剧类型编号  （1.追番，2.追剧）        
-     * @param status 番剧状态（0.全部，1.想看，2.在看，3.已看）
+     * @param typeNum 番剧类型编号  （1.追番，2.追剧）
+     * @param status  番剧状态（0.全部，1.想看，2.在看，3.已看）
      * @return Bangumi对象列表
      */
     public List<Bangumi> getBiliDataAll(int typeNum, int status) {
@@ -68,8 +64,8 @@ public class BangumiFinder {
     /**
      * 获取指定条件下的数据总数
      *
-     * @param typeNum 番剧类型编号（1.追番，2.追剧）        
-     * @param status 番剧状态（0.全部，1.想看，2.在看，3.已看）
+     * @param typeNum 番剧类型编号（1.追番，2.追剧）
+     * @param status  番剧状态（0.全部，1.想看，2.在看，3.已看）
      * @return 数据总数
      */
     public Integer getDataTotal(int typeNum, int status) {
@@ -110,143 +106,191 @@ public class BangumiFinder {
      * 异步获取B站番剧数据
      *
      * @param typeNum 番剧类型编号（1.追番，2.追剧）
-     * @param status 番剧状态（0.全部，1.想看，2.在看，3.已看）
-     * @param ps 每页数量
-     * @param pn 页码
+     * @param status  番剧状态（0.全部，1.想看，2.在看，3.已看）
+     * @param ps      每页数量
+     * @param pn      页码
      * @return Bangumi对象列表的Mono包装
      */
     private Mono<List<Bangumi>> getBiliDataReactive(int typeNum, int status, int ps, int pn) {
-        
         return Mono.zip(
             getBiliId(),
-            this.settingFetcher.get("base").map(setting -> 
-                !setting.get("enable_cover_thumbnail").asBoolean(false)
-            ).defaultIfEmpty(true)
-        ).flatMap(tuple -> {
-            String vmid = tuple.getT1();
-            boolean useThumbnail = tuple.getT2();
-            
-            return bilibiliBangumiClient.listBiliBangumiByPage(
-                BilibiliBangumiRequest.builder()
-                    .vmid(vmid)
-                    .typeNum(typeNum)
-                    .status(status)
-                    .ps(ps)
-                    .pn(pn)
-                    .build())
-                .map(item -> item.withArray("/list"))
-                .flatMapIterable(item -> {
-                    ArrayList<ObjectNode> objectNodes = new ArrayList<>();
-                    item.forEach(jsonNode -> {
-                        if (jsonNode instanceof ObjectNode) {
-                            objectNodes.add((ObjectNode) jsonNode);
-                        }
-                    });
-                    return objectNodes;
-                })
-                .map(item -> {
-                    Bangumi bangumi = new Bangumi();
-                    bangumi.setMetadata(new Metadata());
-                    bangumi.getMetadata().setGenerateName("ban-");
-                    bangumi.setSpec(new Bangumi.BangumiSpec());
-                    Bangumi.BangumiSpec spec = bangumi.getSpec();
-                    
-                    JsonNode titleNode = item.get("title");
-                    spec.setTitle(titleNode != null ? titleNode.textValue() : "");
-                    
-                    JsonNode seasonTypeNode = item.get("season_type_name");
-                    spec.setType(seasonTypeNode != null ? seasonTypeNode.textValue() : "");
-                    
-                    ArrayNode areasNode = item.withArray("/areas");
-                    if (areasNode != null && areasNode.size() > 0) {
-                        JsonNode firstArea = areasNode.get(0);
-                        if (firstArea != null) {
-                            JsonNode nameNode = firstArea.get("name");
-                            if (nameNode != null) {
-                                spec.setArea(nameNode.textValue());
-                            }
-                        }
-                    }
-                    
-                    JsonNode coverNode = item.get("cover");
-                    String coverUrl = coverNode != null ? coverNode.textValue() : "";
-                    // 修复正则表达式，将HTTP转换为HTTPS
-                    String httpsCoverUrl = coverUrl.startsWith("http://") ? 
-                        coverUrl.replaceFirst("^http://", "https://") : coverUrl;
-                    // 根据配置决定使用缩略图还是原图
-                    String finalCoverUrl = useThumbnail ? httpsCoverUrl + "@220w_280h.webp" : httpsCoverUrl;
-                    spec.setCover(finalCoverUrl);
-                    
-                    JsonNode totalCountNode = item.get("total_count");
-                    int total_count = totalCountNode != null ? totalCountNode.intValue() : -1;
-                    spec.setTotalCount(total_count >= 0 ? 
-                        (total_count == -1 ? "未完结" : 
-                         String.format("全%d%s", total_count, typeNum == 1 ? "话" : "集")) : "-");
-                    
-                    JsonNode mediaIdNode = item.get("media_id");
-                    spec.setId(mediaIdNode != null ? mediaIdNode.asText() : "");
-                    
-                    JsonNode stat = item.get("stat");
-                    if (stat != null) {
-                        JsonNode followNode = stat.get("follow");
-                        spec.setFollow(count(followNode != null ? followNode.asLong() : 0));
-                        
-                        JsonNode viewNode = stat.get("view");
-                        spec.setView(count(viewNode != null ? viewNode.asLong() : 0));
-                        
-                        JsonNode danmakuNode = stat.get("danmaku");
-                        spec.setDanmaku(count(danmakuNode != null ? danmakuNode.asLong() : 0));
-                        
-                        JsonNode coinNode = stat.get("coin");
-                        spec.setCoin(count(coinNode != null ? coinNode.asLong() : 0));
-                    } else {
-                        spec.setFollow("-");
-                        spec.setView("-");
-                        spec.setDanmaku("-");
-                        spec.setCoin("-");
-                    }
-                    
-                    JsonNode ratingNode = item.get("rating");
-                    if (ratingNode != null) {
-                        JsonNode scoreNode = ratingNode.get("score");
-                        String score = scoreNode != null ? scoreNode.asText() : "";
-                        spec.setScore(score);
-                    }
-                    
-                    JsonNode evaluateNode = item.get("evaluate");
-                    spec.setDes(evaluateNode != null ? evaluateNode.textValue() : "");
-                    
-                    spec.setUrl("https://www.bilibili.com/bangumi/media/md" + spec.getId());
-                    return bangumi;
-                })
-                .collectList();
-        });
+            getUseThumbnailSetting()
+        ).flatMap(tuple -> fetchAndParseBangumiList(tuple.getT1(), tuple.getT2(), typeNum, status, ps, pn));
+    }
+
+    /**
+     * 获取是否使用缩略图的配置
+     */
+    private Mono<Boolean> getUseThumbnailSetting() {
+        return this.settingFetcher.get("base")
+            .map(setting -> !setting.get("enable_cover_thumbnail").asBoolean(false))
+            .defaultIfEmpty(true);
+    }
+
+    /**
+     * 获取并解析番剧列表数据
+     */
+    private Mono<List<Bangumi>> fetchAndParseBangumiList(
+        String vmid, boolean useThumbnail, int typeNum, int status, int ps, int pn) {
+        BilibiliBangumiRequest request = BilibiliBangumiRequest.builder()
+            .vmid(vmid)
+            .typeNum(typeNum)
+            .status(status)
+            .ps(ps)
+            .pn(pn)
+            .build();
+
+        return bilibiliBangumiClient.listBiliBangumiByPage(request)
+            .map(dataNode -> parseBangumiList(dataNode, useThumbnail, typeNum));
+    }
+
+    /**
+     * 解析番剧列表数据
+     */
+    private List<Bangumi> parseBangumiList(
+        BilibiliApiResponse.DataNode dataNode, boolean useThumbnail, int typeNum) {
+        if (dataNode == null || dataNode.getList() == null) {
+            return new ArrayList<>();
+        }
+
+        List<Bangumi> bangumiList = new ArrayList<>();
+        for (BilibiliApiResponse.BilibiliBangumiItem item : dataNode.getList()) {
+            if (item != null) {
+                bangumiList.add(parseBangumiItem(item, useThumbnail, typeNum));
+            }
+        }
+        return bangumiList;
+    }
+
+    /**
+     * 解析单个番剧项
+     */
+    private Bangumi parseBangumiItem(
+        BilibiliApiResponse.BilibiliBangumiItem item, boolean useThumbnail, int typeNum) {
+        Bangumi bangumi = createBangumi();
+        Bangumi.BangumiSpec spec = bangumi.getSpec();
+
+        spec.setId(item.getMediaId());
+        spec.setTitle(item.getTitle());
+        spec.setType(item.getSeasonTypeName());
+        spec.setArea(extractFirstAreaName(item));
+        spec.setCover(buildCoverUrl(item.getCover(), useThumbnail));
+        spec.setTotalCount(buildTotalCountText(item.getTotalCount(), typeNum));
+        spec.setDes(item.getEvaluate());
+        spec.setUrl(buildBangumiUrl(item.getMediaId()));
+
+        parseStatData(item, spec);
+        parseRatingData(item, spec);
+
+        return bangumi;
+    }
+
+    /**
+     * 创建空的Bangumi对象
+     */
+    private Bangumi createBangumi() {
+        Bangumi bangumi = new Bangumi();
+        bangumi.setMetadata(new Metadata());
+        bangumi.getMetadata().setGenerateName("ban-");
+        bangumi.setSpec(new Bangumi.BangumiSpec());
+        return bangumi;
+    }
+
+    /**
+     * 提取地区名称
+     */
+    private String extractFirstAreaName(BilibiliApiResponse.BilibiliBangumiItem item) {
+        if (item.getAreas() == null || item.getAreas().isEmpty()) {
+            return null;
+        }
+        BilibiliApiResponse.BilibiliBangumiItem.Area firstArea = item.getAreas().get(0);
+        return firstArea != null ? firstArea.getName() : null;
+    }
+
+    /**
+     * 构建封面URL
+     */
+    private String buildCoverUrl(String coverUrl, boolean useThumbnail) {
+        if (coverUrl == null) {
+            coverUrl = "";
+        }
+        String httpsUrl = coverUrl.startsWith("http://")
+            ? coverUrl.replaceFirst("^http://", "https://")
+            : coverUrl;
+        return useThumbnail ? httpsUrl + "@220w_280h.webp" : httpsUrl;
+    }
+
+    /**
+     * 构建总集数字符串
+     */
+    private String buildTotalCountText(int totalCount, int typeNum) {
+        if (totalCount < 0) {
+            return "-";
+        }
+        if (totalCount == -1) {
+            return "未完结";
+        }
+        String unit = typeNum == 1 ? "话" : "集";
+        return String.format("全%d%s", totalCount, unit);
+    }
+
+    /**
+     * 解析统计数据
+     */
+    private void parseStatData(BilibiliApiResponse.BilibiliBangumiItem item, Bangumi.BangumiSpec spec) {
+        BilibiliApiResponse.BilibiliBangumiItem.Stat stat = item.getStat();
+        if (stat == null) {
+            spec.setFollow("-");
+            spec.setView("-");
+            spec.setDanmaku("-");
+            spec.setCoin("-");
+            return;
+        }
+
+        spec.setFollow(count(stat.getFollow()));
+        spec.setView(count(stat.getView()));
+        spec.setDanmaku(count(stat.getDanmaku()));
+        spec.setCoin(count(stat.getCoin()));
+    }
+
+    /**
+     * 解析评分数据
+     */
+    private void parseRatingData(BilibiliApiResponse.BilibiliBangumiItem item, Bangumi.BangumiSpec spec) {
+        BilibiliApiResponse.BilibiliBangumiItem.Rating rating = item.getRating();
+        if (rating != null) {
+            spec.setScore(rating.getScore());
+        }
+    }
+
+    /**
+     * 构建番剧URL
+     */
+    private String buildBangumiUrl(String mediaId) {
+        return "https://www.bilibili.com/bangumi/media/md" + mediaId;
     }
 
     /**
      * 异步获取数据总数
      *
      * @param typeNum 番剧类型编号（1.追番，2.追剧）
-     * @param status 番剧状态（0.全部，1.想看，2.在看，3.已看）
+     * @param status  番剧状态（0.全部，1.想看，2.在看，3.已看）
      * @return 数据总数的Mono包装
      */
     private Mono<Integer> getDataTotalReactive(int typeNum, int status) {
         return getBiliId().flatMap(vmid ->
             bilibiliBangumiClient.listBiliBangumiByPage(
-                BilibiliBangumiRequest.builder()
-                    .vmid(vmid)
-                    .typeNum(typeNum)
-                    .status(status)
-                    .ps(1)
-                    .pn(1)
-                    .build())
-                .next()
-                .map(item -> {
-                    JsonNode totalNode = item.get("total");
-                    return totalNode != null ? totalNode.intValue() : 0;
-                })
+                    BilibiliBangumiRequest.builder()
+                        .vmid(vmid)
+                        .typeNum(typeNum)
+                        .status(status)
+                        .ps(1)
+                        .pn(1)
+                        .build())
+                .map(dataNode -> dataNode != null ? dataNode.getTotal() : 0)
         );
     }
+
     /**
      * 统一参数的番剧列表查询方法，支持分页、类型、状态等参数，且均为可选参数。
      *
@@ -268,7 +312,7 @@ public class BangumiFinder {
     /**
      * 安全地将对象转换为整数
      *
-     * @param value 要转换的值
+     * @param value        要转换的值
      * @param defaultValue 默认值
      * @return 转换后的整数值
      */
@@ -289,9 +333,9 @@ public class BangumiFinder {
      * 分页获取番剧列表（使用默认配置）
      *
      * @param typeNum 番剧类型编号（1.追番，2.追剧）
-     * @param status 番剧状态（0.全部，1.想看，2.在看，3.已看）
-     * @param page 页码
-     * @param size 每页大小
+     * @param status  番剧状态（0.全部，1.想看，2.在看，3.已看）
+     * @param page    页码
+     * @param size    每页大小
      * @return 番剧列表结果的Mono包装
      */
     public Mono<BangumiListResult> list(int typeNum, int status, int page, int size) {
@@ -301,10 +345,10 @@ public class BangumiFinder {
     /**
      * 分页获取番剧列表
      *
-     * @param typeNum 番剧类型编号（1.追番，2.追剧）
-     * @param status 番剧状态（0.全部，1.想看，2.在看，3.已看）
-     * @param page 页码
-     * @param size 每页大小
+     * @param typeNum        番剧类型编号（1.追番，2.追剧）
+     * @param status         番剧状态（0.全部，1.想看，2.在看，3.已看）
+     * @param page           页码
+     * @param size           每页大小
      * @param sizeFromConfig 是否从配置中获取大小
      * @return 番剧列表结果的Mono包装
      */
