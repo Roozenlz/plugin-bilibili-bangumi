@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id "io.freefair.lombok" version "8.13"
-    id "run.halo.plugin.devtools" version "0.6.1"
+    id "run.halo.plugin.devtools" version "0.6.2"
 //    id "com.github.node-gradle.node" version "5.0.0"
 }
 
@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    implementation platform('run.halo.tools.platform:plugin:2.21.0')
+    implementation platform('run.halo.tools.platform:plugin:2.23.0')
     compileOnly 'run.halo.app:api'
 
     testImplementation 'run.halo.app:api'
@@ -40,7 +40,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 halo {
-    version = '2.21'
+    version = '2.23'
     superAdminUsername = 'admin'
     superAdminPassword = 'admin'
     externalUrl = 'http://localhost:8091'
@@ -48,7 +48,7 @@ halo {
         // windows 需要改为 npipe:////./pipe/docker_engine
         // linux、macos 需要改为 unix:///var/run/docker.sock
         url = 'unix:///Users/roozen/.orbstack/run/docker.sock'
-        apiVersion = '1.45'
+        apiVersion = '1.51'
     }
     port = 8091
 
