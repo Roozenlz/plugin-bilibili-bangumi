@@ -1,7 +1,7 @@
 package top.roozen.bangumi.client;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import top.roozen.bangumi.model.BilibiliApiResponse;
 import top.roozen.bangumi.request.BilibiliBangumiRequest;
 
 /**
@@ -18,7 +18,7 @@ public interface IBilibiliBangumiClient {
      * 根据请求参数分页查询Bilibili番剧信息
      *
      * @param request 请求参数对象，包含分页和其他查询条件
-     * @return Flux流式响应，每个元素为包含番剧信息的ObjectNode对象
+     * @return Mono响应，包含番剧信息的data节点
      */
-    Flux<ObjectNode> listBiliBangumiByPage(BilibiliBangumiRequest request);
+    Mono<BilibiliApiResponse.DataNode> listBiliBangumiByPage(BilibiliBangumiRequest request);
 }
