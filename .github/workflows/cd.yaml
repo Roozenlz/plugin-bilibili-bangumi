@@ -8,9 +8,12 @@ on:
 jobs:
   cd:
     uses: halo-sigs/reusable-workflows/.github/workflows/plugin-cd.yaml@v3
+    secrets:
+      halo-pat: ${{ secrets.HALO_PAT }}
     permissions:
       contents: write
     with:
       java-version: 21
       skip-node-setup: true
-      skip-appstore-release: true
+      skip-appstore-release: false
+      app-id: app-OTFPN
