@@ -13,7 +13,6 @@ jobs:
     permissions:
       contents: write
     with:
-      java-version: 21
-      skip-node-setup: true
-      skip-appstore-release: false
+      java-version: "21"
+      node-version: "24"
       app-id: app-OTFPN
