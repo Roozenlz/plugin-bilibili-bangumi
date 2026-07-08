@@ -15,4 +15,5 @@ jobs:
     with:
       java-version: "21"
       node-version: "24"
+      skip-node-setup: true
       app-id: app-OTFPN
