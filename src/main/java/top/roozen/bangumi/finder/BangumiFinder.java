@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.Metadata;
 import run.halo.app.plugin.ReactiveSettingFetcher;
@@ -15,6 +16,7 @@ import top.roozen.bangumi.model.Bangumi;
 import top.roozen.bangumi.model.BilibiliApiResponse;
 import top.roozen.bangumi.model.BangumiListResult;
 import top.roozen.bangumi.request.BilibiliBangumiRequest;
+import org.springframework.http.HttpStatus;
 
 /**
  * @author <a href="https://roozen.top">Roozen</a>
@@ -306,7 +308,38 @@ public class BangumiFinder {
         int status = toIntSafely(params.get("status"), 0);
         int page = toIntSafely(params.get("page"), 1);
         int size = toIntSafely(params.get("size"), 10);
+
+        // 验证参数有效性，无效参数返回404而不是500
+        if (!validateParams(typeNum, status, page, size)) {
+            return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid parameters"));
+        }
+
         return list(typeNum, status, page, size);
+    }
+
+    /**
+     * 验证参数有效性
+     *
+     * @param typeNum 番剧类型编号（1.追番，2.追剧）
+     * @param status  番剧状态（0.全部，1.想看，2.在看，3.已看）
+     * @param page    页码（必须大于0且为整数）
+     * @param size    每页大小（必须大于0且为整数）
+     * @return 参数有效返回true，否则返回false
+     */
+    private boolean validateParams(int typeNum, int status, int page, int size) {
+        // typeNum 必须是 1 或 2
+        if (typeNum != 1 && typeNum != 2) {
+            return false;
+        }
+        // status 必须是 0, 1, 2, 3
+        if (status < 0 || status > 3) {
+            return false;
+        }
+        // page 和 size 必须大于 0 且为整数
+        if (page < 1 || size < 1) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -353,6 +386,11 @@ public class BangumiFinder {
      * @return 番剧列表结果的Mono包装
      */
     public Mono<BangumiListResult> list(int typeNum, int status, int page, int size, boolean sizeFromConfig) {
+        // 验证参数有效性，无效参数返回404而不是500
+        if (!validateParams(typeNum, status, page, size)) {
+            return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid parameters"));
+        }
+
         int actualPage = page < 1 ? 1 : page;
         int actualSize = size < 1 ? 10 : size;
         return Mono.zip(
