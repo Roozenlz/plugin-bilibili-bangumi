@@ -44,6 +44,7 @@ public class BilibiliBangumiClient implements IBilibiliBangumiClient {
                 request.getPn())
             .retrieve()
             .bodyToMono(BilibiliApiResponse.class)
-            .map(BilibiliApiResponse::getData);
+            .flatMap(response -> Mono.justOrEmpty(response.getData()))
+            .defaultIfEmpty(new BilibiliApiResponse.DataNode());
     }
 }
